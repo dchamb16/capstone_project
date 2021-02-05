@@ -27,8 +27,11 @@ vocab_size = encoder.vocab_size(X_train)
 X_train = encoder.encode_text(X_train)
 X_test = encoder.encode_text(X_test, test_data=True)
 
+encoder.save_encoder('./encoder.pkl')
+encoder.save_encoder_variables('./encoder_variables')
+
 model.define_model(length, vocab_size)
 
 model.fit_model(X_train, array(y_train), X_test, array(y_test), epochs=50, batch_size = 32)
 
-model.save('./classification_model.h5')
+model.save_model('./classification_model.h5')
