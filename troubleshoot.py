@@ -5,6 +5,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from numpy import array
 import numpy as np
 from tensorflow.keras.layers import Input, Dense, Flatten, Dropout, Embedding, Conv1D, MaxPooling1D, concatenate
+from tensorflow.keras.layers import Bidirectional, GRU
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.metrics import AUC
 from tensorflow.keras.utils import to_categorical
@@ -82,3 +83,26 @@ print(res)
 np.sum(res)
 y_train.columns[np.argmax(res)]
 
+
+
+rnn = Sequential()
+rnn.add(Input(shape=(length,)))
+rnn.add(Embedding(vocab_size, 100))
+rnn.add(Bidirectional(GRU(64)))
+rnn.add(Dense(32, activation='relu'))
+rnn.add(Dense(11, activation='softmax'))
+
+rnn.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', AUC()])
+rnn.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=32, class_weight=cw)
+
+df['ticket_text'].iloc[2937]
+df['issue'].iloc[2937]
+test_text = ['I would like a refund for my recent payment']
+tt = [clean.prepare_text(text) for text in test_text]
+print(tt)
+tt = encode_text(tokenizer, tt, length)
+print(tt)
+res = rnn.predict(tt)
+print(res)
+np.sum(res)
+y_train.columns[np.argmax(res)]
