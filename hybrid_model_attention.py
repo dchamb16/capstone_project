@@ -1,10 +1,10 @@
 # Import Libraries
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Input, Dense, Embedding, MaxPooling1D, Conv1D, SpatialDropout1D, GlobalMaxPooling1D
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense, Embedding, Dropout, GRU, Bidirectional, Conv1D, MaxPooling1D, SpatialDropout1D, Attention, Flatten
 from tensorflow.keras import metrics
 from numpy import array
 
-class ConvNet:
+class HybridModel:
     '''
     Class for convolutional neural network text classification model
     '''
@@ -23,19 +23,20 @@ class ConvNet:
             Vocabulary size of the text documents
         '''
         
-        model = Sequential()
-        model.add(Input(shape=(length,)))
-        model.add(Embedding(vocab_size, 250))
-        model.add(SpatialDropout1D(.25))
-        model.add(Conv1D(filters=32, kernel_size=4, activation='relu'))
-        model.add(MaxPooling1D(pool_size=2))
-        model.add(SpatialDropout1D(.25))
-        model.add(GlobalMaxPooling1D())
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(num_outcome_classes, activation='softmax'))
-
+        input = Input(shape=(length,))
+        embed = Embedding(vocab_size, 200)(input)   
+        gru = Bidirectional(GRU(128, return_sequences=True))(embed)
+        drop1 = SpatialDropout1D(0.2)(gru)
+        conv = Conv1D(filters=256, kernel_size=4, activation='relu')(drop1)
+        pool = MaxPooling1D(pool_size=2)(conv)
+        att = Attention()([gru, pool])
+        flat = Flatten()(att)
+        drop2 = Dropout(.2)(flat)
+        dense1 = Dense(64, activation='relu')(drop2)
+        output = Dense(num_outcome_classes, activation='softmax')(dense1)
         
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', metrics.AUC()])
+        model = Model(inputs=input, outputs=output)
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy', metrics.AUC()])
         
         self.model = model
 

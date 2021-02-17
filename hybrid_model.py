@@ -1,10 +1,10 @@
 # Import Libraries
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Input, Dense, Embedding, MaxPooling1D, Conv1D, SpatialDropout1D, GlobalMaxPooling1D
+from tensorflow.keras.layers import Input, Dense, Embedding, Dropout, GRU, Bidirectional, Conv1D, MaxPooling1D, SpatialDropout1D, Attention, Flatten
 from tensorflow.keras import metrics
 from numpy import array
 
-class ConvNet:
+class HybridModel:
     '''
     Class for convolutional neural network text classification model
     '''
@@ -25,17 +25,17 @@ class ConvNet:
         
         model = Sequential()
         model.add(Input(shape=(length,)))
-        model.add(Embedding(vocab_size, 250))
-        model.add(SpatialDropout1D(.25))
-        model.add(Conv1D(filters=32, kernel_size=4, activation='relu'))
+        model.add(Embedding(vocab_size, 200))
+        model.add(Bidirectional(GRU(128, return_sequences=True)))
+        model.add(SpatialDropout1D(0.2))
+        model.add(Conv1D(filters=64, kernel_size=4, activation='relu'))
         model.add(MaxPooling1D(pool_size=2))
-        model.add(SpatialDropout1D(.25))
-        model.add(GlobalMaxPooling1D())
+        model.add(Flatten())
+        model.add(Dropout(.2))
         model.add(Dense(32, activation='relu'))
         model.add(Dense(num_outcome_classes, activation='softmax'))
-
         
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', metrics.AUC()])
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy', metrics.AUC()])
         
         self.model = model
 

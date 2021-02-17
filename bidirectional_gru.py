@@ -1,8 +1,10 @@
 # Import Libraries
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Input, Dense, Embedding, MaxPooling1D, Conv1D, SpatialDropout1D, GlobalMaxPooling1D
+#from tensorflow.keras.layers import Input, Dense, Flatten, Dropout, Embedding, MaxPooling1D, Conv1D, concatenate, GRU
+from tensorflow.keras.layers import Dense, Embedding, GRU, Dropout, Bidirectional, SpatialDropout1D
 from tensorflow.keras import metrics
 from numpy import array
+from tensorflow.python.keras.layers.core import Activation
 
 class ConvNet:
     '''
@@ -11,7 +13,7 @@ class ConvNet:
     def __init__(self):
         pass
 
-    def define_model(self, length, vocab_size, num_outcome_classes):
+    def define_model(self, length, vocab_size):
         '''
         Defines and compiles a convolutional neural network model
 
@@ -24,18 +26,18 @@ class ConvNet:
         '''
         
         model = Sequential()
-        model.add(Input(shape=(length,)))
-        model.add(Embedding(vocab_size, 250))
-        model.add(SpatialDropout1D(.25))
-        model.add(Conv1D(filters=32, kernel_size=4, activation='relu'))
-        model.add(MaxPooling1D(pool_size=2))
-        model.add(SpatialDropout1D(.25))
-        model.add(GlobalMaxPooling1D())
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(num_outcome_classes, activation='softmax'))
+        model.add(Embedding(vocab_size, 125, input_length=length))
+        model.add(SpatialDropout1D(0.2))
+        model.add(GRU(64))
+        #model.add(Bidirectional(GRU(75)))
+        model.add(Dropout(0.25))
+        model.add(Dense(3, activation='softmax'))
 
-        
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', metrics.AUC()])
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy',metrics.AUC()])
+
+
+        #model = Model(inputs=inputs1, outputs=outputs)
+        #model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', metrics.AUC()])
         
         self.model = model
 
