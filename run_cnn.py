@@ -38,13 +38,16 @@ labels = pd.get_dummies(trainLabels)
 
 X_train, X_test, y_train, y_test = train_test_split(trainLines, labels, test_size=.2, random_state=42, stratify=labels)
 
+# test_data = pd.concat([pd.DataFrame(X_test), pd.DataFrame(y_test)], axis=1)
+# test_data.to_pickle('./test_data.pkl')
+
 length = encoder.max_length(X_train)
 vocab_size = encoder.vocab_size(X_train)
 X_train = encoder.encode_text(X_train)
 X_test = encoder.encode_text(X_test, test_data=True)
 
-encoder.save_encoder('./encoder_files/encoder.pkl')
-encoder.save_encoder_variables('./encoder_files/encoder_variables')
+# encoder.save_encoder('./encoder_files/encoder.pkl')
+# encoder.save_encoder_variables('./encoder_files/encoder_variables')
 
 model.define_model(length, vocab_size, labels.shape[1])
 model.fit_model(X_train, y_train, X_test, y_test, epochs=20, batch_size = 256, class_weights=weights)

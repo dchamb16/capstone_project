@@ -1,3 +1,4 @@
+# import libraries
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from clean_text import CleanText
@@ -47,6 +48,6 @@ X_test = encoder.encode_text(X_test, test_data=True)
 # encoder.save_encoder_variables('./encoder_files/encoder_variables')
 
 model.define_model(length, vocab_size, labels.shape[1])
-model.fit_model(X_train, y_train, X_test, y_test, epochs=20, batch_size = 256, class_weights=weights)
+model.fit_model(X_train, y_train, X_test, y_test, epochs=10, batch_size = 256, class_weights=weights)
 
 model.save_model('./model_files/rnn_classification_model.h5')
